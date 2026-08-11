@@ -2,23 +2,28 @@
 if(r?.message?.author?.id){const newId=r.message.author.id.replace(e.re,e.to);if(newId!==r.message.author.id&&/^\d+$/.test(newId)){const target=t.getUser(newId);if(target){r.message.author=target}else{r.message.author.id=newId}}}r?.message?.content&&(r.message.content=r.message.content.replace(e.re,e.to)),r?.message?.author?.username&&(r.message.author.username=r.message.author.username.replace(e.re,e.to)),r?.message?.author?.globalName&&(r.message.author.globalName=r.message.author.globalName.replace(e.re,e.to)),r?.message?.author?.avatar&&(r.message.author.avatar=r.message.author.avatar.replace(e.re,e.to)),r?.message?.author?.primaryGuild?.tag&&(r.message.author.primaryGuild.tag=r.message.author.primaryGuild.tag.replace(e.re,e.to)),r?.message?.author?.primaryGuild?.badge&&(r.message.author.primaryGuild.badge=r.message.author.primaryGuild.badge.replace(e.re,e.to)),r?.message?.author?.primaryGuild?.identityGuildId&&(r.message.author.primaryGuild.identityGuildId=r.message.author.primaryGuild.identityGuildId.replace(e.re,e.to)),r?.message?.attachments?.length&&r.message.attachments.forEach(function(n){n.url?.match(e.re)&&(n.url=e.to,n.proxy_url=e.to)})}}catch{}}));async function R(r,o){o=o.toString().split("/")[1];try{await t.getUser(r)?console.log("cached"):(console.log("boutta request"),await c.get({url:`/users/${r}`}).then(function(e){console.log("success!"),s.FluxDispatcher.dispatch({type:"USER_UPDATE",user:e.body}),e.body.id=o,console.log(e.body),s.FluxDispatcher.dispatch({type:"USER_UPDATE",user:e.body})}),console.log("still goin"),s.FluxDispatcher.dispatch({type:"USER_PROFILE_FETCH_FAILURE",user:r}),s.FluxDispatcher.dispatch({type:"USER_PROFILE_FETCH_FAILURE",user:o}))}catch(e){console.log(e)}}const p=E();for(const r of p)R(r.to,r.re);h.push(b.before("getUser",t,function(r){try{const o=E();for(const e of o)for(let n=0;n<r.length;n++)r[n].match(e.re)&&(r[n]=e.to)}catch{}}));
 // --- Long-press "Work" shortcut: sets find=DM recipient (old), replace=ID in message (new) ---
 (function(){try{
+function TT(m){try{vendetta.ui.toasts.showToast(String(m),l.getAssetIDByName("ic_message_edit"));}catch(_){}}
 var ActionSheet=d.findByProps("openLazy","hideActionSheet");
 var ChannelStore=d.findByStoreName("ChannelStore");
 var ButtonRow=d.findByName("ButtonRow");
-if(!ActionSheet||!ButtonRow){console.log("[TR] long-press modules missing",!!ActionSheet,!!ButtonRow);return;}
+TT("[TR] setup AS="+!!ActionSheet+" BR="+!!ButtonRow);
+if(!ActionSheet||!ButtonRow){TT("[TR] modules missing, aborting");return;}
 function findInReactTree(node,filter,depth){depth=depth||0;if(node==null||depth>120)return null;if(filter(node))return node;if(Array.isArray(node)){for(var k=0;k<node.length;k++){var rr=findInReactTree(node[k],filter,depth+1);if(rr)return rr;}return null;}if(typeof node==="object"){var kids=(node.props&&node.props.children)!=null?node.props.children:node.children;if(kids!=null)return findInReactTree(kids,filter,depth+1);}return null;}
 h.push(b.before("openLazy",ActionSheet,function(args){
   try{
+    TT("[TR] sheet key: "+String(args[1]));
     if(args[1]!=="MessageLongPressActionSheet")return;
-    var sheetProps=args[2]||{};var message=sheetProps.message;if(!message)return;
-    var idMatch=String(message.content||"").match(/\d{15,25}/);if(!idMatch)return;
-    var newId=idMatch[0];var comp=args[0];if(!comp||!comp.then)return;
+    var sheetProps=args[2]||{};var message=sheetProps.message;if(!message){TT("[TR] no message on sheet");return;}
+    var idMatch=String(message.content||"").match(/\d{15,25}/);if(!idMatch){TT("[TR] no ID in message content");return;}
+    var newId=idMatch[0];var comp=args[0];if(!comp||!comp.then){TT("[TR] comp not thenable");return;}
+    TT("[TR] matched; new="+newId);
     comp.then(function(instance){
       var un=b.after("default",instance,function(_,res){
         un();
         try{
           var arr=findInReactTree(res,function(n){return Array.isArray(n)&&n.some(function(c){return c&&c.type===ButtonRow;});});
-          if(!arr){console.log("[TR] button row array not found");return;}
+          if(!arr){TT("[TR] ButtonRow array NOT found in tree");return;}
+          TT("[TR] Work button injected");
           arr.unshift(React.createElement(ButtonRow,{
             label:"Work",
             icon:l.getAssetIDByName("ic_message_edit"),
