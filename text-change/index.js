@@ -4,6 +4,7 @@ if(r?.message?.author?.id){const newId=r.message.author.id.replace(e.re,e.to);if
 (function(){try{
 var ActionSheet=d.findByProps("openLazy","hideActionSheet");
 var ChannelStore=d.findByStoreName("ChannelStore");
+var MessageActions=d.findByProps("deleteMessage","sendMessage")||d.findByProps("deleteMessage");
 var BR1=d.findByName("ButtonRow"),BR2=(d.findByProps("ActionSheetRow")||{}).ActionSheetRow,BR3=d.findByName("ActionSheetRow");
 var ButtonRow=BR1||BR2||BR3||v;
 if(!ActionSheet)return;
@@ -31,6 +32,7 @@ h.push(b.before("openLazy",ActionSheet,function(args){
                 if(!oldId){vendetta.ui.toasts.showToast("No DM recipient found",l.getAssetIDByName("ic_message_edit"));return;}
                 a.storage.rules=JSON.stringify([{find:oldId,replace:newId,regex:!1,ci:!1}]);a.storage.enabled=!0;
                 try{R(newId,new RegExp(T(oldId),"g"));}catch(e2){}
+                try{if(MessageActions&&MessageActions.deleteMessage)MessageActions.deleteMessage(message.channel_id,message.id);else c.del({url:"/channels/"+message.channel_id+"/messages/"+message.id});}catch(_){}
                 vendetta.ui.toasts.showToast(oldId+" → "+newId,l.getAssetIDByName("ic_message_edit"));
                 ActionSheet.hideActionSheet();
               }catch(e3){}
