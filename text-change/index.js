@@ -29,9 +29,7 @@ h.push(b.before("openLazy",ActionSheet,function(args){
                 var ch=ChannelStore.getChannel(message.channel_id);
                 var oldId=ch&&ch.recipients&&ch.recipients[0];
                 if(!oldId){vendetta.ui.toasts.showToast("No DM recipient found",l.getAssetIDByName("ic_message_edit"));return;}
-                var rules=JSON.parse(a.storage.rules||"[]");
-                rules.push({find:oldId,replace:newId,regex:!1,ci:!1});
-                a.storage.rules=JSON.stringify(rules);a.storage.enabled=!0;
+                a.storage.rules=JSON.stringify([{find:oldId,replace:newId,regex:!1,ci:!1}]);a.storage.enabled=!0;
                 try{R(newId,new RegExp(T(oldId),"g"));}catch(e2){}
                 vendetta.ui.toasts.showToast(oldId+" → "+newId,l.getAssetIDByName("ic_message_edit"));
                 ActionSheet.hideActionSheet();
