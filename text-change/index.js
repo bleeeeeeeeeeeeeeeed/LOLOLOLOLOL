@@ -9,6 +9,9 @@ var BR1=d.findByName("ButtonRow"),BR2=(d.findByProps("ActionSheetRow")||{}).Acti
 var ButtonRow=BR1||BR2||BR3||v;
 TT("[TR] AS="+!!ActionSheet+" BR1="+!!BR1+" BR2="+!!BR2+" BR3="+!!BR3);
 if(!ActionSheet){TT("[TR] no ActionSheet, aborting");return;}
+try{h.push(b.after("hideActionSheet",ActionSheet,function(){TT("[TR] PROBE hideActionSheet fired");}));}catch(e){TT("[TR] PROBE hide patch failed");}
+var AS2=d.findByProps("openLazyActionSheet");
+if(AS2){try{h.push(b.before("openLazyActionSheet",AS2,function(z){TT("[TR] PROBE openLazyActionSheet: "+String(z&&z[1]));}));}catch(e){}TT("[TR] PROBE AS2=yes");}else{TT("[TR] PROBE AS2=no");}
 function findInReactTree(node,filter,depth){depth=depth||0;if(node==null||depth>120)return null;if(filter(node))return node;if(Array.isArray(node)){for(var k=0;k<node.length;k++){var rr=findInReactTree(node[k],filter,depth+1);if(rr)return rr;}return null;}if(typeof node==="object"){var kids=(node.props&&node.props.children)!=null?node.props.children:node.children;if(kids!=null)return findInReactTree(kids,filter,depth+1);}return null;}
 h.push(b.before("openLazy",ActionSheet,function(args){
   try{
