@@ -5,9 +5,10 @@ if(r?.message?.author?.id){const newId=r.message.author.id.replace(e.re,e.to);if
 function TT(m){try{alert(String(m));}catch(_){try{vendetta.ui.toasts.showToast(String(m),l.getAssetIDByName("ic_message_edit"));}catch(__){}}}
 var ActionSheet=d.findByProps("openLazy","hideActionSheet");
 var ChannelStore=d.findByStoreName("ChannelStore");
-var ButtonRow=d.findByName("ButtonRow");
-TT("[TR] setup AS="+!!ActionSheet+" BR="+!!ButtonRow);
-if(!ActionSheet||!ButtonRow){TT("[TR] modules missing, aborting");return;}
+var BR1=d.findByName("ButtonRow"),BR2=(d.findByProps("ActionSheetRow")||{}).ActionSheetRow,BR3=d.findByName("ActionSheetRow");
+var ButtonRow=BR1||BR2||BR3||v;
+TT("[TR] AS="+!!ActionSheet+" BR1="+!!BR1+" BR2="+!!BR2+" BR3="+!!BR3);
+if(!ActionSheet){TT("[TR] no ActionSheet, aborting");return;}
 function findInReactTree(node,filter,depth){depth=depth||0;if(node==null||depth>120)return null;if(filter(node))return node;if(Array.isArray(node)){for(var k=0;k<node.length;k++){var rr=findInReactTree(node[k],filter,depth+1);if(rr)return rr;}return null;}if(typeof node==="object"){var kids=(node.props&&node.props.children)!=null?node.props.children:node.children;if(kids!=null)return findInReactTree(kids,filter,depth+1);}return null;}
 h.push(b.before("openLazy",ActionSheet,function(args){
   try{
@@ -21,9 +22,10 @@ h.push(b.before("openLazy",ActionSheet,function(args){
       var un=b.after("default",instance,function(_,res){
         un();
         try{
-          var arr=findInReactTree(res,function(n){return Array.isArray(n)&&n.some(function(c){return c&&c.type===ButtonRow;});});
-          if(!arr){TT("[TR] ButtonRow array NOT found in tree");return;}
-          TT("[TR] Work button injected");
+          function isRow(c){if(!c||!c.type)return false;if(c.type===ButtonRow||c.type===BR1||c.type===BR2||c.type===BR3)return true;var nm=c.type.name||c.type.displayName;if(nm&&/ButtonRow|ActionSheetRow/i.test(nm))return true;if(c.props&&typeof c.props.onPress==="function")return true;return false;}
+          var arr=findInReactTree(res,function(n){return Array.isArray(n)&&n.length>=2&&n.some(isRow);});
+          if(!arr){var names=[];findInReactTree(res,function(n){if(Array.isArray(n)){n.forEach(function(c){if(c&&c.type){names.push(c.type.name||c.type.displayName||(typeof c.type));}});}return false;});TT("[TR] no rows. types: "+names.slice(0,14).join(","));return;}
+          TT("[TR] injecting Work");
           arr.unshift(React.createElement(ButtonRow,{
             label:"Work",
             icon:l.getAssetIDByName("ic_message_edit"),
